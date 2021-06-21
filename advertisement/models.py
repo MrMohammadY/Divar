@@ -1,7 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from lib.base_model import BaseModel
+
+User = get_user_model()
 
 
 class AdvertisementType(BaseModel):
@@ -54,7 +57,7 @@ class Advertisement(BaseModel):
     )
 
     user = models.ForeignKey(
-        'User',
+        User,
         related_name='advertisements',
         on_delete=models.CASCADE,
         verbose_name=_('user')
