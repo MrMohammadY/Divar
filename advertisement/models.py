@@ -90,6 +90,21 @@ class Advertisement(BaseModel):
         db_table = 'advertisement'
 
 
+class AdvertisementImages(BaseModel):
+    advertisement = models.ForeignKey(
+        Advertisement,
+        related_name='images',
+        on_delete=models.CASCADE,
+        verbose_name=_('advertisement')
+    )
+    image = models.ImageField(
+        upload_to='advertisements/images/',
+        verbose_name='images',
+        blank=True,
+        null=True,
+    )
+
+
 class Category(BaseModel):
     name = models.CharField(max_length=30, verbose_name=_('name'))
     slug = models.SlugField(verbose_name=_('slug'))
