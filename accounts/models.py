@@ -36,6 +36,7 @@ class CustomUserManager(UserManager):
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=13, verbose_name=_('phone number'))
+
     is_staff = models.BooleanField(
         _('staff status'),
         default=False,
@@ -51,7 +52,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
-    objects = UserManager()
+    objects = CustomUserManager()
 
     USERNAME_FIELD = 'phone_number'
     REQUIRED_FIELDS = ['phone_number']
