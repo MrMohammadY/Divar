@@ -35,7 +35,7 @@ class CustomUserManager(UserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    phone_number = models.CharField(max_length=13, verbose_name=_('phone number'))
+    phone_number = models.CharField(max_length=13, verbose_name=_('phone number'), unique=True)
 
     is_staff = models.BooleanField(
         _('staff status'),
@@ -55,7 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['phone_number']
+    REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = _('user')
