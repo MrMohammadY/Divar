@@ -28,7 +28,7 @@ class AdvertisementAttribute(BaseModel):
     )
     name = models.CharField(max_length=32, verbose_name=_('name'), unique=True)
     advertisement_type = models.ForeignKey(AdvertisementType, related_name='attributes', on_delete=models.CASCADE)
-    attribute_type = models.PositiveSmallIntegerField(verbose_name=_('attribute type'), choices=STRING)
+    attribute_type = models.PositiveSmallIntegerField(verbose_name=_('attribute type'), choices=STATUS)
 
     class Meta:
         verbose_name = _('Advertisement Attribute')
