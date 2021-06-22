@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Advertisements{% endblock %}
+
+{% block content %}
+
+    {% for adv in advertisements %}
+
+        <div class="card" style="width: 18rem;">
+
+            <img src="" class="card-img-top" alt="...">
+
+            <div class="card-body">
+
+                <h5 class="card-title">adv.title</h5>
+                <p class="card-text">adv.description</p>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+{% endblock %}
