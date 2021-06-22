@@ -88,6 +88,7 @@ class Advertisement(BaseModel):
         verbose_name = _('Advertisement')
         verbose_name_plural = _('Advertisements')
         db_table = 'advertisement'
+        ordering = ('created_time', )
 
 
 class AdvertisementImages(BaseModel):
