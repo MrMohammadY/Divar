@@ -12,7 +12,7 @@
 
             <div class="card-body">
 
-                <h5 class="card-title">adv.title</h5>
+                <a href="{% url 'advertisement:advertisement_detail' adv.uuid adv.slug %}"><h5 class="card-title">adv.title</h5></a>
                 <p class="card-text">adv.description</p>
 
             </div>
