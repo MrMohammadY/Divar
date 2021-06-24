@@ -5,15 +5,17 @@
 {% block content %}
 
     {% for adv in advertisements %}
-
         <div class="card" style="width: 18rem;">
 
-            <img src="" class="card-img-top" alt="...">
+            {% if adv.images.first is not None %}
+                <a href="{{ adv.get_absolute_url }}"><img src="{{ adv.images.first.image.url }}" class="card-img-top" alt="{{ adv.title }}"></a>
+            {% endif %}
 
             <div class="card-body">
 
-                <a href="{% url 'advertisement:advertisement_detail' adv.uuid adv.slug %}"><h5 class="card-title">adv.title</h5></a>
-                <p class="card-text">adv.description</p>
+                <a href="{{ adv.get_absolute_url }}" class="text-dark" style="text-decoration:none"><h5 class="card-title">{{ adv.title }}</h5></a>
+                <small class="card-text"> {{ adv.price }}</small><br>
+                <small class="card-text">{{ adv.date_time_advertisement }} {{ adv.city.name }}</small><br>
 
             </div>
 

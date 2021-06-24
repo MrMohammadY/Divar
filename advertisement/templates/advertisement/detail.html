@@ -4,39 +4,32 @@
 
 {% block content %}
     <div>
-        <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
-            <ol class="carousel-indicators">
-                <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-                <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-                <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
-            </ol>
 
+        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" style="width: 400px;height: 200px">
             <div class="carousel-inner">
-
-                {% for img in advertisement.images %}
-
-                    <div class="carousel-item active">
-                        <img class="d-block w-100" src="{{ img.url }}" width="300" height="200" alt="">
+                {% for img in advertisement.images.all %}
+                    <div class="carousel-item {% if forloop.counter0 == 0 %}active{% endif %}">
+                        <img src="{{ img.image.url }}" width="400px" height="200px" alt="">
                     </div>
-
                 {% endfor %}
-
             </div>
-
-            <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="sr-only">Previous</span>
-            </a>
-
-            <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="sr-only">Next</span>
-            </a>
-
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
+                    data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="false" style="background-color: black"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
+                    data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="false" style="background-color: black"></span>
+            </button>
         </div>
 
+        <br>
+        <br>
         <h4>{{ advertisement.title }}</h4>
         <p>{{ advertisement.description }}</p>
 
+        {% for atr in advertisement.values.all %}
+            <p>{{ atr.attribute.name }}: {{ atr.value }}</p>
+        {% endfor %}
     </div>
 {% endblock %}

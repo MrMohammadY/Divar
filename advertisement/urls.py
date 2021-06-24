@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import advertisement_list, advertisement_detail
+from .views import AdvertisementListView, AdvertisementDetailView
 
 app_name = 'advertisement'
 
 urlpatterns = [
-    path('', advertisement_list, name='advertisement_list'),
-    path('detail/<int:uuid>/<slug:slug>/', advertisement_detail, name='advertisement_detail'),
+    path('', AdvertisementListView.as_view(), name='advertisement_list'),
+    path('<str:category>', AdvertisementListView.as_view(), name='advertisement_list'),
+    path('detail/<int:pk>/<str:slug>', AdvertisementDetailView.as_view(), name='advertisement_detail'),
 ]
