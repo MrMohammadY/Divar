@@ -22,7 +22,7 @@ class AdvertisementListView(ListView):
         context = super().get_context_data(object_list=None, **kwargs)
         if self.kwargs.get('category'):
 
-            context['advertisements'] = Advertisement.objects.filter(
+            context['advertisements'] = Advertisement.objects.select_related('category').filter(
                 Q(category__slug=self.kwargs['category']) | Q(category__parent__slug=self.kwargs['category'])
 
             )
