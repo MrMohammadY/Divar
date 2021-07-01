@@ -13,10 +13,7 @@
         </li>
         {% else %}
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:login' %}" style="margin-right: 2px;margin-left: 2px">ورود</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:profile' %}" style="margin-right: 2px;margin-left: 2px">ساخت حساب</a>
+            <a class="nav-link" href="{% url 'accounts:login-register' %}" style="margin-right: 2px;margin-left: 2px">ورود</a>
         </li>
         {% endif %}
     </ul>

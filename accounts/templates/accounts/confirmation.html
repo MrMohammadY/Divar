@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div style="width: 300px; height: 200px" align="center">
+        <form method="POST">
+            {% csrf_token %}
+            <p>{{ form.code }}</p>
+            <input type="submit" class="btn btn-primary" value="ورود" style="width: 80px;">
+        </form>
+    </div>
+{% endblock %}

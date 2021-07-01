@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -8,9 +10,9 @@ from django.utils.translation import ugettext_lazy as _
 User = get_user_model()
 
 
-class LoginUserForm(forms.Form):
+class LoginRegisterUserForm(forms.Form):
     phone_number = forms.CharField(
-        max_length=13,
+        max_length=10,
         widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
@@ -20,24 +22,14 @@ class LoginUserForm(forms.Form):
 
     )
 
-    password = forms.CharField(
-        widget=forms.PasswordInput(
+
+class ConfirmationPhoneNumberForm(forms.Form):
+    code = forms.CharField(
+        widget=forms.TextInput(
             attrs={
                 'class': 'form-control',
-                'placeholder': 'رمز عبور'
+                'placeholder': 'کد تایید'
             }
         )
-
     )
-
-    def clean(self):
-        phone_number = self.cleaned_data['phone_number']
-        password = self.cleaned_data['password']
-
-        user = User.objects.filter(phone_number=phone_number).first()
-
-        if user is not None:
-            if user.check_password(password):
-                self.cleaned_data['user'] = user
-                return self.cleaned_data
 
