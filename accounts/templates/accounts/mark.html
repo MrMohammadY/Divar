@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}اگهی های نشان شده{% endblock %}
+
+{% block content %}
+    {% if marks|length == 0 %}
+        <p>آگهی نشان نشده است!</p>
+    {% else %}
+        {% for mark in marks %}
+            <div class="card" style="width: 18rem;">
+
+                {% if mark.advertisement.images.first is not None %}
+                    <a href="{{ mark.advertisement.get_absolute_url }}">
+                        <img src="{{ mark.advertisement.images.first.image.url }}" class="card-img-top" alt="{{ mark.advertisement.title }}">
+                    </a>
+                {% endif %}
+
+                <div class="card-body">
+
+                    <a href="{{ mark.advertisement.get_absolute_url }}" class="text-dark" style="text-decoration:none"><h5
+                            class="card-title">{{ mark.advertisement.title }}</h5></a>
+                    <small class="card-text"> {{ mark.advertisement.price }}</small><br>
+                    <small class="card-text">{{ mark.advertisement.date_time_advertisement }} {{ mark.advertisement.city.name }}</small><br>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+{% endblock %}

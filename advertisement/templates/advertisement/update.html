@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+    <div>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {{ formset.management_form  }}
+            {{ formset.as_p }}
+            <input type="submit" value="ثبت" class="btn btn-primary" style="margin-left: 10px; width: 70px">
+            <a  href="{{ advertisement.get_absolute_url }}" class="btn btn-warning" style="width: 70px">کنسل</a>
+
+        </form>
+    </div>
+{% endblock %}

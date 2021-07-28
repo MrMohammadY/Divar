@@ -9,6 +9,17 @@ from lib.base_model import BaseModel
 User = get_user_model()
 
 
+class CustomAdvertisementStatusObjects(models.Manager):
+    def accepted_advertisement(self):
+        return super().get_queryset().filter(status=Advertisement.ACCEPTED)
+
+    def draft_advertisement(self):
+        return super().get_queryset().filter(status=Advertisement.DRAFT)
+
+    def not_approved_advertisement(self):
+        return super().get_queryset().filter(status=Advertisement.NOT_APPROVED)
+
+
 class AdvertisementType(BaseModel):
     title = models.CharField(max_length=30, verbose_name=_('title'), unique=True)
 
@@ -59,6 +70,14 @@ class AdvertisementAttributeValue(BaseModel):
 
 
 class Advertisement(BaseModel):
+    DRAFT = 0
+    ACCEPTED = 1
+    NOT_APPROVED = 2
+    STATUS = (
+        (DRAFT, _('draft')),
+        (ACCEPTED, _('accepted')),
+        (NOT_APPROVED, _('not approved')),
+    )
     upc = models.BigIntegerField(unique=True)
     type = models.ForeignKey(
         AdvertisementType,
@@ -93,7 +112,10 @@ class Advertisement(BaseModel):
     price = models.BigIntegerField(verbose_name=_('price'))
     slug = models.SlugField(verbose_name=_('slug'), allow_unicode=True)
     is_agreement = models.BooleanField(verbose_name=_('is agreement'), default=False)
-    is_available = models.BooleanField(verbose_name=_('is available'), default=False)
+    status = models.PositiveSmallIntegerField(choices=STATUS, verbose_name=(_('status')), default=DRAFT)
+
+    objects = models.Manager()  # The default manager.
+    status_objects = CustomAdvertisementStatusObjects()
 
     class Meta:
         verbose_name = _('Advertisement')
@@ -167,6 +189,18 @@ class State(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class MarK(BaseModel):
+    user = models.ForeignKey(User, related_name='marks', on_delete=models.CASCADE, verbose_name=_('user'))
+    advertisement = models.ForeignKey(
+        Advertisement, related_name='marks', on_delete=models.CASCADE, verbose_name=_('advertisement')
+    )
+
+    class Meta:
+        verbose_name = _('MarK')
+        verbose_name_plural = _('MarKs')
+        db_table = 'marK'
 
 
 class City(BaseModel):

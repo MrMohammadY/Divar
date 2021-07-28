@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
-
+{% load get_user_marks %}
 {% block title %}{{ advertisement.title }}{% endblock %}
 
 {% block content %}
     <div>
 
-        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel" style="width: 400px;height: 200px">
+        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel"
+             style="width: 400px;height: 200px">
             <div class="carousel-inner">
                 {% for img in advertisement.images.all %}
                     <div class="carousel-item {% if forloop.counter0 == 0 %}active{% endif %}">
@@ -31,5 +32,25 @@
         {% for atr in advertisement.values.all %}
             <p>{{ atr.attribute.name }}: {{ atr.value }}</p>
         {% endfor %}
+        <br>
+        <br>
+        {% if request.user == advertisement.user %}
+            <a href="{% url 'advertisement:advertisement_update' advertisement.id advertisement.slug %}"
+               class="btn btn-primary" style="margin-left: 10px; width: 70px">اپدیت</a>
+            <a href="{% url 'advertisement:advertisement_delete_confirm' advertisement.id advertisement.slug %}"
+               class="btn btn-danger" style="width: 70px">حذف</a>
+
+        {% endif %}
+        {% if advertisement.status == 1 %}
+            {% get_mark_advertisement request.user advertisement as flag %}
+            {% if flag %}
+                <a href="{% url 'advertisement:mark_advertisement' advertisement.id %}" class="btn btn-danger"
+                   style="width: 70px">حذف از نشان شده ها</a>
+            {% else %}
+                <a href="{% url 'advertisement:mark_advertisement' advertisement.id %}" class="btn btn-danger"
+                   style="width: 70px">نشان کردن</a>
+            {% endif %}
+        {% endif %}
+
     </div>
 {% endblock %}

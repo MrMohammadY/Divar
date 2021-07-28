@@ -1,14 +1,15 @@
 from django.contrib import admin
 
 from .models import Advertisement, AdvertisementType, AdvertisementAttribute, AdvertisementAttributeValue, \
-    AdvertisementImages, Category, City, State
+    AdvertisementImages, Category, City, State, MarK
 
 
 @admin.register(Advertisement)
 class AdvertisementAdmin(admin.ModelAdmin):
-    list_display = ('upc', 'type', 'user', 'category', 'city', 'title', 'slug', 'is_available')
-    list_filter = ('type', 'is_available')
+    list_display = ('upc', 'type', 'user', 'category', 'city', 'title', 'slug', 'status')
+    list_filter = ('type', 'status')
     search_fields = ('title', 'slug')
+    list_editable = ('status',)
 
 
 @admin.register(AdvertisementType)
@@ -52,3 +53,8 @@ class CityAdmin(admin.ModelAdmin):
 class StateAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name', 'slug')
+
+
+@admin.register(MarK)
+class MarkAdmin(admin.ModelAdmin):
+    list_display = ('user', 'advertisement')

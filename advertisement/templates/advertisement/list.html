@@ -23,8 +23,16 @@
         </ul>
 
     {% endfor %}
-
+    <div>
+        <form action="" method="GET">
+            <input type="number" name="min_price"><br><br>
+            <input type="number" name="max_price"><br><br>
+            <button type="submit" class="btn btn-primary">فیلتر</button>
+            <br><br>
+        </form>
+    </div>
     {% for adv in advertisements %}
+
         <div class="card" style="width: 18rem;">
 
             {% if adv.images.first is not None %}

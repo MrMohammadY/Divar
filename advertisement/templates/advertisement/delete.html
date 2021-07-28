@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete{% endblock %}
+
+{% block content %}
+    <div>
+    <form method="POST">
+        {% csrf_token %}
+                <p>ایا میخواهد {{ advertisement }} رو پاک کنید؟</p>
+        <input type="submit" value="تایید" class="btn btn-danger" style="margin-left: 10px; width: 70px">
+        <a  href="{{ advertisement.get_absolute_url }}" class="btn btn-warning" style="width: 70px">کنسل</a>
+
+    </form>
+
+
+    </div>
+{% endblock %}
