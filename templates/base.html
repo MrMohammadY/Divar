@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load get_categories %}
 <html lang="en">
 <head>
 
@@ -15,6 +16,26 @@
 {% include 'inc/messages.html' %}
 
 <div style="margin: 20px">
+    {% categories as cats %}
+    {% for cat in cats %}
+
+        <ul class="list-group">
+
+            <a href="{% url "advertisement:advertisement_list" cat.slug %}" class="list-group-item">{{ cat.name }}</a>
+
+            {% for child in cat.children.all %}
+
+                <ul class="list-group">
+
+                    <a href="{% url "advertisement:advertisement_list" child.slug %}"
+                       class="list-group-item">{{ child.name }}</a>
+                </ul>
+
+            {% endfor %}
+
+        </ul>
+
+    {% endfor %}
     {% block content %}{% endblock %}
 </div>
 

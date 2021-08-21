@@ -7,6 +7,7 @@ User = get_user_model()
 class PhoneNumberAuthenticateBacked(BaseBackend):
     def authenticate(self, request, phone_number=None):
         try:
+            print(phone_number)
             user = User.objects.get(phone_number=phone_number)
             print('user:', user)
             return user

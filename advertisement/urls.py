@@ -1,9 +1,6 @@
-from django.contrib.auth.decorators import login_required
 from django.urls import path
 
-from advertisement.views import AdvertisementListView, AdvertisementDetailView, AdvertisementUpdateView, \
-    AdvertisementDeleteView, AdvertisementCreateView, AdvertisementAttributeValueCreateView,\
-    DeleteOrCreateAdvertisementMarkView, AdvertisementMarkView
+from advertisement.views import *
 
 app_name = 'advertisement'
 
@@ -16,4 +13,5 @@ urlpatterns = [
     path('detail/<int:pk>/<str:slug>/update', AdvertisementUpdateView.as_view(), name='advertisement_update'),
     path('<int:pk>/<str:slug>/delete/confirm', AdvertisementDeleteView.as_view(), name='advertisement_delete_confirm'),
     path('mark/<int:advertisement_id>', DeleteOrCreateAdvertisementMarkView.as_view(), name='mark_advertisement'),
+
 ]

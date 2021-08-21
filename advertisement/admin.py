@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import Advertisement, AdvertisementType, AdvertisementAttribute, AdvertisementAttributeValue, \
-    AdvertisementImages, Category, City, State, MarK
+from .models import *
 
 
 @admin.register(Advertisement)
@@ -31,7 +30,7 @@ class AdvertisementAttributeValueAdmin(admin.ModelAdmin):
     search_fields = ('value',)
 
 
-@admin.register(AdvertisementImages)
+@admin.register(AdvertisementImage)
 class AdvertisementImagesAdmin(admin.ModelAdmin):
     list_display = ('advertisement', 'image')
 
@@ -58,3 +57,8 @@ class StateAdmin(admin.ModelAdmin):
 @admin.register(MarK)
 class MarkAdmin(admin.ModelAdmin):
     list_display = ('user', 'advertisement')
+
+
+@admin.register(AdvertisementEngagement)
+class AdvertisementEngagementAdmin(admin.ModelAdmin):
+    list_display = ('advertisement', 'user', 'created_time')

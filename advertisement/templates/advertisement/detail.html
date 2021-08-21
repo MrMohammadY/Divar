@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% load get_user_marks %}
+{% load get_user_marks promotion_filter %}
 {% block title %}{{ advertisement.title }}{% endblock %}
 
 {% block content %}
-    <div>
+    <div style="margin-right: 20px; margin-top: 80px">
 
         <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel"
-             style="width: 400px;height: 200px">
+             style="width: 400px;height: 200px; margin-top: 80px; margin-bottom: 40px">
             <div class="carousel-inner">
                 {% for img in advertisement.images.all %}
                     <div class="carousel-item {% if forloop.counter0 == 0 %}active{% endif %}">
@@ -24,33 +24,55 @@
             </button>
         </div>
 
-        <br>
-        <br>
-        <h4>{{ advertisement.title }}</h4>
-        <p>{{ advertisement.description }}</p>
 
-        {% for atr in advertisement.values.all %}
-            <p>{{ atr.attribute.name }}: {{ atr.value }}</p>
-        {% endfor %}
-        <br>
-        <br>
-        {% if request.user == advertisement.user %}
-            <a href="{% url 'advertisement:advertisement_update' advertisement.id advertisement.slug %}"
-               class="btn btn-primary" style="margin-left: 10px; width: 70px">اپدیت</a>
-            <a href="{% url 'advertisement:advertisement_delete_confirm' advertisement.id advertisement.slug %}"
-               class="btn btn-danger" style="width: 70px">حذف</a>
-
-        {% endif %}
-        {% if advertisement.status == 1 %}
-            {% get_mark_advertisement request.user advertisement as flag %}
+        <div style="margin-bottom: 50px; margin-top: 30px">
+            {% promotion_instantaneous advertisement as flag %}
             {% if flag %}
-                <a href="{% url 'advertisement:mark_advertisement' advertisement.id %}" class="btn btn-danger"
-                   style="width: 70px">حذف از نشان شده ها</a>
-            {% else %}
-                <a href="{% url 'advertisement:mark_advertisement' advertisement.id %}" class="btn btn-danger"
-                   style="width: 70px">نشان کردن</a>
+                <small class="card-text" style="color: red">فوری</small><br>
             {% endif %}
+            <h4>{{ advertisement.title }}</h4>
+            <p>توضیحات: {{ advertisement.description }}</p>
+            <p>قیمت: {{ advertisement.price }}</p>
+            <p>شهر: {{ advertisement.city.name }}</p>
+
+            {% for atr in advertisement.values.all %}
+                <p>{{ atr.attribute.name }}: {{ atr.value }}</p>
+            {% endfor %}
+        </div>
+
+        {% if request.user != advertisement.user %}
+            <div class="show-information">
+                <p>تماس: {{ advertisement.user.phone_number }}</p>
+                <p>پیامک: {{ advertisement.user.phone_number }}</p>
+            </div>
+        {% else %}
+            <div style="margin-bottom: 80px">
+                <h5>همه بازدید ها: {{ advertisement.engagements.count }}</h5>
+            </div>
         {% endif %}
+
+
+        <div style="margin-bottom: 40px; margin-top: 80px">
+            {% if request.user == advertisement.user %}
+                <a href="{% url 'advertisement:advertisement_update' advertisement.id advertisement.slug %}"
+                   class="btn btn-primary" style="width: 70px">اپدیت</a>
+                <a href="{% url 'advertisement:advertisement_delete_confirm' advertisement.id advertisement.slug %}"
+                   class="btn btn-danger" style="width: 70px">حذف</a>
+                <a href="{% url 'promotion:advertisement-promotion' advertisement.id %}"
+                   class="btn btn-info" style="width: 70px">ارتقا</a>
+            {% endif %}
+            {% if advertisement.status == 1 and request.user.is_authenticated %}
+                {% get_mark_advertisement request.user advertisement as flag %}
+                {% if flag %}
+                    <a href="{% url 'advertisement:mark_advertisement' advertisement.id %}" class="btn btn-warning"
+                       style="width: 100px">حذف از نشان شده ها</a>
+                {% else %}
+                    <a href="{% url 'advertisement:mark_advertisement' advertisement.id %}" class="btn btn-warning"
+                       style="width: 100px">نشان کردن</a>
+                {% endif %}
+            {% endif %}
+        </div>
+
 
     </div>
 {% endblock %}

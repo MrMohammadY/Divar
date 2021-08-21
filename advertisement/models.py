@@ -1,7 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from random import randint
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Case, When, F, Q
+from django.utils import timezone
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
 from lib.base_model import BaseModel
@@ -10,14 +14,28 @@ User = get_user_model()
 
 
 class CustomAdvertisementStatusObjects(models.Manager):
-    def accepted_advertisement(self):
+
+    def advertisement_accepted(self):
         return super().get_queryset().filter(status=Advertisement.ACCEPTED)
 
-    def draft_advertisement(self):
-        return super().get_queryset().filter(status=Advertisement.DRAFT)
+    def advertisement_custom_filter(self, min_price, max_price, instantaneous, category=None):
+        queryset = self.advertisement_accepted().filter(price__range=(min_price, max_price))
 
-    def not_approved_advertisement(self):
-        return super().get_queryset().filter(status=Advertisement.NOT_APPROVED)
+        if instantaneous:
+            from promotion.models import Promotion
+            time = timedelta(days=3)
+
+            queryset = queryset.annotate(days=Case(When(
+                promotions__promotion__name=Promotion.INSTANTANEOUS,
+                then=timezone.now() - F('promotions__created_time')
+            ))).filter(days__lte=time)
+
+        if category:
+            queryset = queryset.select_related('category').filter(
+                Q(category__in=category.children.all()) | Q(category=category)
+            )
+
+        return queryset
 
 
 class AdvertisementType(BaseModel):
@@ -78,6 +96,9 @@ class Advertisement(BaseModel):
         (ACCEPTED, _('accepted')),
         (NOT_APPROVED, _('not approved')),
     )
+
+    ad_time = models.DateTimeField(auto_now_add=True)
+
     upc = models.BigIntegerField(unique=True)
     type = models.ForeignKey(
         AdvertisementType,
@@ -115,17 +136,22 @@ class Advertisement(BaseModel):
     status = models.PositiveSmallIntegerField(choices=STATUS, verbose_name=(_('status')), default=DRAFT)
 
     objects = models.Manager()  # The default manager.
-    status_objects = CustomAdvertisementStatusObjects()
+    custom_objects = CustomAdvertisementStatusObjects()
 
     class Meta:
         verbose_name = _('Advertisement')
         verbose_name_plural = _('Advertisements')
         db_table = 'advertisement'
-        ordering = ('created_time',)
+        ordering = ('-ad_time', '-created_time')
 
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('advertisement:advertisement_detail', kwargs={'pk': self.id, 'slug': self.slug})
+
+    def set_default_fields(self, user):
+        self.user = user
+        self.upc = randint(100, 10000)
+        self.slug = slugify(self.title, allow_unicode=True)
 
     def date_time_advertisement(self):
         created_time = datetime.strptime(self.created_time.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
@@ -144,7 +170,7 @@ class Advertisement(BaseModel):
         return self.title
 
 
-class AdvertisementImages(BaseModel):
+class AdvertisementImage(BaseModel):
     advertisement = models.ForeignKey(
         Advertisement,
         related_name='images',
@@ -215,3 +241,33 @@ class City(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class AdvertisementEngagement(BaseModel):
+    advertisement = models.ForeignKey(
+        Advertisement,
+        on_delete=models.CASCADE,
+        related_name='engagements',
+        verbose_name=_('advertisement')
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='engagements',
+        verbose_name=_('user'),
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _('AdvertisementEngagement')
+        verbose_name_plural = _('AdvertisementEngagements')
+        db_table = 'aAdvertisement_engagement'
+
+    @classmethod
+    def create_engagement(cls, adv, user):
+        if user != adv.user:
+            cls.objects.get_or_create(
+                user=user if user.is_authenticated else None,
+                advertisement=adv
+            )
