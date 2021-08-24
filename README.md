@@ -9,7 +9,7 @@ This project is the MVP version of [divar](https://divar.ir/) which developing w
 - [x] each user can watch other user's advertisements. 
 - [x] advertisements should have a category.
 - [x] each category should have its properties.
-- [ ] in advertisements should show user information which this created it.
+- [x] in advertisements should show user information which this created it.
 - [x] user can search in advertisements
 
 ---
