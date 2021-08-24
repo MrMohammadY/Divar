@@ -22,7 +22,7 @@ def advertisement_formset(extra):
 
 
 class AdvertisementCreateForm(forms.ModelForm):
-    category = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None))
+    category = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None).filter(children=None))
 
     class Meta:
         model = Advertisement

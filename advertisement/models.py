@@ -48,7 +48,7 @@ class AdvertisementAttribute(BaseModel):
         (FLOAT, _('Float')),
         (STRING, _('String')),
     )
-    name = models.CharField(max_length=32, verbose_name=_('name'), unique=True)
+    name = models.CharField(max_length=32, verbose_name=_('name'))
     advertisement_type = models.ForeignKey('Category', related_name='attributes', on_delete=models.CASCADE)
     attribute_type = models.PositiveSmallIntegerField(verbose_name=_('attribute type'), choices=STATUS)
 
@@ -181,6 +181,9 @@ class Category(BaseModel):
         verbose_name_plural = _('Categories')
         db_table = 'category'
 
+    def set_slug(self):
+        self.slug = slugify(self.name, allow_unicode=True)
+
     def __str__(self):
         return self.name
 
@@ -193,6 +196,9 @@ class State(BaseModel):
         verbose_name = _('State')
         verbose_name_plural = _('States')
         db_table = 'state'
+
+    def set_slug(self):
+        self.slug = slugify(self.name, allow_unicode=True)
 
     def __str__(self):
         return self.name
@@ -214,6 +220,9 @@ class City(BaseModel):
     name = models.CharField(max_length=40, verbose_name=_('name'), unique=True)
     slug = models.SlugField(verbose_name=_('slug'), allow_unicode=True, unique=True)
     state = models.ForeignKey(State, related_name='cities', on_delete=models.CASCADE)
+
+    def set_slug(self):
+        self.slug = slugify(self.name, allow_unicode=True)
 
     class Meta:
         verbose_name = _('City')

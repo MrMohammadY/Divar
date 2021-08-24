@@ -3,6 +3,8 @@ from django.contrib import admin
 
 from .models import *
 
+User = get_user_model()
+
 
 @admin.register(Advertisement)
 class AdvertisementAdmin(admin.ModelAdmin):
@@ -10,6 +12,15 @@ class AdvertisementAdmin(admin.ModelAdmin):
     list_filter = ('status', 'category')
     search_fields = ('title', 'slug')
     list_editable = ('status',)
+
+    def save_model(self, request, obj, form, change):
+        obj.set_default_fields(request.user)
+        return super().save_model(request, obj, form, change)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj=None, change=False, **kwargs)
+        form.base_fields['category'] = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None))
+        return form
 
 
 @admin.register(AdvertisementAttribute)
@@ -20,7 +31,8 @@ class AdvertisementAttributeAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj=None, change=False, **kwargs)
-        form.base_fields['advertisement_type'] = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None))
+        form.base_fields['advertisement_type'] = forms.ModelChoiceField(
+            queryset=Category.objects.exclude(parent=None).filter(children=None))
         return form
 
 
@@ -41,17 +53,34 @@ class CategoryAdmin(admin.ModelAdmin):
     list_filter = ('parent',)
     search_fields = ('name', 'slug')
 
+    def save_model(self, request, obj, form, change):
+        obj.set_slug()
+        return super().save_model(request, obj, form, change)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj=None, change=False, **kwargs)
+        form.base_fields['parent'] = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None))
+        return form
+
 
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'state')
     search_fields = ('name', 'slug')
 
+    def save_model(self, request, obj, form, change):
+        obj.set_slug()
+        return super().save_model(request, obj, form, change)
+
 
 @admin.register(State)
 class StateAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     search_fields = ('name', 'slug')
+
+    def save_model(self, request, obj, form, change):
+        obj.set_slug()
+        return super().save_model(request, obj, form, change)
 
 
 @admin.register(MarK)

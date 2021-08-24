@@ -27,7 +27,7 @@
 
                         <a href="{{ adv.get_absolute_url }}" class="text-dark" style="text-decoration:none"><h5
                                 class="card-title">{{ adv.title }}</h5></a>
-                        <small class="card-text"> {{ adv.price }}</small><br>
+                        <small class="card-text">{{ adv.price }} تومان</small><br>
 
                                 {% promotion_instantaneous adv as flag %}
                                 {% if flag %}
