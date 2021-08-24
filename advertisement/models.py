@@ -38,18 +38,6 @@ class CustomAdvertisementStatusObjects(models.Manager):
         return queryset
 
 
-class AdvertisementType(BaseModel):
-    title = models.CharField(max_length=30, verbose_name=_('title'), unique=True)
-
-    class Meta:
-        verbose_name = 'Advertisement Type'
-        verbose_name_plural = 'Advertisement Types'
-        db_table = 'advertisement_type'
-
-    def __str__(self):
-        return self.title
-
-
 class AdvertisementAttribute(BaseModel):
     INTEGER = 1
     FLOAT = 2
@@ -61,7 +49,7 @@ class AdvertisementAttribute(BaseModel):
         (STRING, _('String')),
     )
     name = models.CharField(max_length=32, verbose_name=_('name'), unique=True)
-    advertisement_type = models.ForeignKey(AdvertisementType, related_name='attributes', on_delete=models.CASCADE)
+    advertisement_type = models.ForeignKey('Category', related_name='attributes', on_delete=models.CASCADE)
     attribute_type = models.PositiveSmallIntegerField(verbose_name=_('attribute type'), choices=STATUS)
 
     class Meta:
@@ -100,13 +88,6 @@ class Advertisement(BaseModel):
     ad_time = models.DateTimeField(auto_now_add=True)
 
     upc = models.BigIntegerField(unique=True)
-    type = models.ForeignKey(
-        AdvertisementType,
-        related_name='advertisements',
-        on_delete=models.PROTECT,
-        verbose_name=_('type')
-    )
-
     user = models.ForeignKey(
         User,
         related_name='advertisements',

@@ -11,19 +11,21 @@ from django.views.generic import FormView, View, TemplateView
 
 from accounts.forms import LoginRegisterUserForm, ConfirmationPhoneNumberForm
 
-from datetime import datetime, timedelta
+from datetime import datetime
+
+from accounts.utils import check_expire_time, set_phone_number_session
 
 User = get_user_model()
 
 
+@method_decorator(login_required, name='dispatch')
 class ProfileView(TemplateView):
     template_name = 'accounts/profile.html'
 
-    @method_decorator(login_required)
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data()
-        context['advertisements'] = request.user.advertisements.all()
-        return self.render_to_response(context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['advertisements'] = self.request.user.advertisements.all()
+        return context
 
 
 class LogoutUserView(View):
@@ -42,12 +44,7 @@ class LoginRegisterUserView(FormView):
     success_url = reverse_lazy('accounts:confirmation')
 
     def form_valid(self, form):
-        self.request.session['phone_number'] = form.cleaned_data['phone_number']
-        self.request.session['code'] = random.randint(1000, 9999)
-        self.request.session['expire_code_time'] = str(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        print(self.request.session['code'])
-        print(self.request.session['expire_code_time'])
-
+        set_phone_number_session(self.request, form.cleaned_data['phone_number'])
         return super().form_valid(form)
 
 
@@ -56,36 +53,23 @@ class ConfirmationPhoneNumberView(FormView):
     template_name = 'accounts/confirmation.html'
     success_url = reverse_lazy('accounts:profile')
 
-    def delete_code_expire_time(self):
-        try:
-            expire_time = datetime.strptime(self.request.session['expire_code_time'], '%Y-%m-%d %H:%M:%S')
-        except KeyError:
-            expire_time = None
+    def delete_code(self):
+        del self.request.session['code']
 
-        if expire_time:
-            now = datetime.strptime(datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
-            if (now - expire_time) > timedelta(minutes=2):
-                del self.request.session['code']
-                del self.request.session['expire_code_time']
-
-    def get(self, request, *args, **kwargs):
-        self.delete_code_expire_time()
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.delete_code_expire_time()
-        return super().post(request, *args, **kwargs)
+    def dispatch(self, request, *args, **kwargs):
+        check_expire_time(request)
+        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        phone_code = '98'
+        phone_number = '98' + self.request.session['phone_number']
+        form_code = int(form.cleaned_data['code'])
+        session_code = self.request.session.get('code', None)
 
-        if self.request.session.get('code'):
+        if session_code:
 
-            if int(form.cleaned_data['code']) == self.request.session['code']:
-
-                phone_number = phone_code + self.request.session['phone_number']
-                user, create = User.objects.get_or_create(phone_number=phone_number, )
-
+            if form_code == session_code:
+                user, create = User.objects.get_or_create(phone_number=phone_number)
+                self.delete_code()
                 if create:
                     password = User.objects.make_random_password()
                     user.set_password(password)
@@ -96,11 +80,9 @@ class ConfirmationPhoneNumberView(FormView):
                 if user:
                     login(self.request, user)
                     messages.info(self.request, 'شما با موفقیت وارد حساب کاربری خود شدید', 'success')
-                    del self.request.session['code']
                     return super().form_valid(form)
 
                 else:
-                    del self.request.session['code']
                     return super().form_valid(form)
 
             else:

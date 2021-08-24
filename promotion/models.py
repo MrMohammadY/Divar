@@ -1,5 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
 from advertisement.models import *
+from django.db import models
 
 
 class Promotion(BaseModel):

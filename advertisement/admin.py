@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 
 from .models import *
@@ -5,16 +6,10 @@ from .models import *
 
 @admin.register(Advertisement)
 class AdvertisementAdmin(admin.ModelAdmin):
-    list_display = ('upc', 'type', 'user', 'category', 'city', 'title', 'slug', 'status')
-    list_filter = ('type', 'status')
+    list_display = ('upc', 'user', 'category', 'city', 'title', 'slug', 'status')
+    list_filter = ('status', 'category')
     search_fields = ('title', 'slug')
     list_editable = ('status',)
-
-
-@admin.register(AdvertisementType)
-class AdvertisementTypeAdmin(admin.ModelAdmin):
-    list_display = ('title',)
-    search_fields = ('title',)
 
 
 @admin.register(AdvertisementAttribute)
@@ -22,6 +17,11 @@ class AdvertisementAttributeAdmin(admin.ModelAdmin):
     list_display = ('name', 'advertisement_type', 'attribute_type')
     list_filter = ('attribute_type',)
     search_fields = ('name',)
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj=None, change=False, **kwargs)
+        form.base_fields['advertisement_type'] = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None))
+        return form
 
 
 @admin.register(AdvertisementAttributeValue)

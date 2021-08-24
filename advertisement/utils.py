@@ -1,3 +1,4 @@
+import json
 from functools import wraps
 from urllib.parse import urlparse
 
@@ -7,7 +8,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import resolve_url
 
-from advertisement.models import Advertisement
+from advertisement.models import Advertisement, Category
 
 
 def check_object_related_to_user(user, obj):
@@ -15,6 +16,38 @@ def check_object_related_to_user(user, obj):
         raise Http404
     else:
         return True
+
+
+def set_advertisement_filter(request, category_slug):
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+
+    if min_price == '':
+        min_price = 0
+
+    if max_price == '':
+        max_price = 100000000000000
+
+    instantaneous = request.GET.get('instantaneous', False)
+    if category_slug:
+        category = Category.objects.filter(slug=category_slug).first()
+        if category is None:
+            raise Http404()
+    else:
+        category = None
+    return category, min_price, max_price, instantaneous
+
+
+def add_or_create_recently_advertisements(request, response, obj):
+    if request.user != obj.user:
+        recently_advertisements = request.COOKIES.get('recently_advertisements', None)
+        if recently_advertisements is None:
+            response.set_cookie('recently_advertisements', json.dumps([obj.id]))
+        else:
+            recently_advertisements = json.loads(recently_advertisements)
+            recently_advertisements.append(obj.id)
+            response.set_cookie('recently_advertisements', json.dumps(recently_advertisements))
+    return response
 
 
 def object_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):

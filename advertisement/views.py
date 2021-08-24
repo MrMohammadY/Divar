@@ -2,7 +2,6 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_http_methods, require_GET
@@ -13,7 +12,8 @@ from django.utils.decorators import method_decorator
 from advertisement.models import *
 from advertisement.forms import AdvertisementAttributeUpdateFormset, AdvertisementCreateForm, advertisement_formset, \
     AdvertisementImageCreateForm, AdvertisementImageUpdateFormset
-from advertisement.utils import object_passes_test, check_object_related_to_user
+from advertisement.utils import object_passes_test, check_object_related_to_user, set_advertisement_filter, \
+    add_or_create_recently_advertisements
 
 User = get_user_model()
 
@@ -24,29 +24,9 @@ class AdvertisementListView(ListView):
     template_name = 'advertisement/list.html'
     context_object_name = 'advertisements'
 
-    def set_filters(self):
-        min_price = self.request.GET.get('min_price', '')
-        max_price = self.request.GET.get('max_price', '')
-        cat_slug = self.kwargs.get('category', None)
-
-        if min_price == '':
-            min_price = 0
-
-        if max_price == '':
-            max_price = 100000000000000
-
-        instantaneous = self.request.GET.get('instantaneous', False)
-        if cat_slug:
-            category = Category.objects.filter(slug=cat_slug).first()
-            if category is None:
-                raise Http404()
-        else:
-            category = None
-        return category, min_price, max_price, instantaneous
-
     def get_queryset(self):
-        category, min_price, max_price, instantaneous = self.set_filters()
-        query = Advertisement.custom_objects.advertisement_custom_filter(min_price, max_price, instantaneous, category)
+        cat, min_p, max_p, instantaneous = set_advertisement_filter(self.request, self.kwargs.get('category', None))
+        query = Advertisement.custom_objects.advertisement_custom_filter(min_p, max_p, instantaneous, cat)
         return query
 
 
@@ -63,19 +43,8 @@ class AdvertisementDetailView(DetailView):
 
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)
-        update_response = self.recently_advertisements(response)
+        update_response = add_or_create_recently_advertisements(self.request, response, self.object)
         return update_response
-
-    def recently_advertisements(self, response):
-        if self.request.user != self.object.user:
-            recently_advertisements = self.request.COOKIES.get('recently_advertisements', None)
-            if recently_advertisements is None:
-                response.set_cookie('recently_advertisements', json.dumps([self.object.id]))
-            else:
-                recently_advertisements = json.loads(recently_advertisements)
-                recently_advertisements.append(self.object.id)
-                response.set_cookie('recently_advertisements', json.dumps(recently_advertisements))
-        return response
 
 
 @method_decorator(login_required, name='dispatch')
@@ -108,7 +77,7 @@ class AdvertisementAttributeValueCreateView(FormView):
             formset = advertisement_attribute_create_formset(self.request.POST, instance=self.object)
 
         else:
-            attributes = AdvertisementAttribute.objects.filter(advertisement_type=self.object.type)
+            attributes = AdvertisementAttribute.objects.filter(advertisement_type=self.object.category)
             advertisement_attribute_create_formset = advertisement_formset(extra=attributes.count())
             formset = advertisement_attribute_create_formset(instance=self.object)
 
@@ -183,7 +152,8 @@ class AdvertisementUpdateView(UpdateView):
             formset = AdvertisementAttributeUpdateFormset(self.request.POST, instance=self.object)
 
             if self.object.images.all().exists():
-                image_form = AdvertisementImageUpdateFormset(self.request.POST, self.request.FILES, instance=self.object)
+                image_form = AdvertisementImageUpdateFormset(self.request.POST, self.request.FILES,
+                                                             instance=self.object)
             else:
                 image_form = AdvertisementImageCreateForm(self.request.POST, self.request.FILES)
         else:

@@ -1,5 +1,5 @@
 from django.forms.models import inlineformset_factory
-from advertisement.models import Advertisement, AdvertisementAttributeValue, AdvertisementImage
+from advertisement.models import Advertisement, AdvertisementAttributeValue, AdvertisementImage, Category
 from django import forms
 
 AdvertisementAttributeUpdateFormset = inlineformset_factory(
@@ -22,9 +22,11 @@ def advertisement_formset(extra):
 
 
 class AdvertisementCreateForm(forms.ModelForm):
+    category = forms.ModelChoiceField(queryset=Category.objects.exclude(parent=None))
+
     class Meta:
         model = Advertisement
-        fields = ('type', 'category', 'city', 'title', 'description', 'price', 'is_agreement')
+        fields = ('category', 'city', 'title', 'description', 'price', 'is_agreement')
 
 
 class AdvertisementImageCreateForm(forms.Form):
